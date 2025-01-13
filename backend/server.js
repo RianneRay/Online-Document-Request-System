@@ -1,19 +1,14 @@
 import express from "express";
 import ENV_VAR from "./config/ENV_VAR.js";
 import connectDB from "./config/db.js"
+import router from "./router/auth.router.js"
 
 const app = express();
 
 const PORT = ENV_VAR.PORT;
 
-app.get("/", (req, res) => {
-  try {
-    res.send("server start")
-  } catch (error) {
-    console.log("error in server")
-    res.status(500).message({success: false, message: error.message})
-  }
-})
+app.use(express.json());
+app.use("/api/v1/user", router);
 
 app.listen(PORT, () => {
   console.log(`server start at http://localhost:${PORT}`)

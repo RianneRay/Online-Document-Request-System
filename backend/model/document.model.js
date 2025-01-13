@@ -1,18 +1,19 @@
 import mongoose from "mongoose";
 
-const documents = new mongoose.Schema({
+const documentSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
-  }
+  },
   status: {
-    enum: ["pending", "success"]
-    default: pending
-  }
+    type: String,
+    enum: ["pending", "success"],
+    default: "pending"
+  },
   dateRequested: {
     type: Date,
     default: Date.now()
-  }
+  },
   releaseData: {
     type: Date,
     default: () => {
@@ -22,3 +23,5 @@ const documents = new mongoose.Schema({
     }
   }
 })
+
+export const Document = mongoose.model("Document", documentSchema)
