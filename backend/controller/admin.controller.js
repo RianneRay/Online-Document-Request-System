@@ -1,20 +1,20 @@
 import express from "express";
-import { User } from "../model/auth.model.js"
-import { Document } from "../model/document.model.js"
+import bcrypt from "bcryptjs";
+import { User } from "../model/auth.model.js";
+import { Document } from "../model/document.model.js";
 import { generateTokenAndSetCookies } from "../utils/generateToken.js"
-import bcrypt from "bcryptjs"
 
 async function hashPassword(password) {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     return hashedPassword
   }
-
-export const signupController = async (req, res) => {
-  const { username, email, password } = req.body;
+  
+export const adminSignupController = async (req, res) => {
+  const { username, email, password, role } = req.body;
   
   try {
-    if(!username || !email || !password) {
+    if(!username || !email || !password || !role) {
       return res.status(400).json({success: false, message: "please provide all field"})
     }
     
@@ -30,13 +30,14 @@ export const signupController = async (req, res) => {
     
     const existingEmail = await User.findOne({ email })
     if(existingEmail) {
-      return res.status(400).json({success: falae, message: "email already use"})
+      return res.status(400).json({success: false, message: "email already use"})
     }
     
     const hashedPassword = await hashPassword(password)
     const newUser = new User({
       username,
       email,
+      role,
       password: hashedPassword
     });
     generateTokenAndSetCookies(newUser._id, res);
@@ -53,7 +54,7 @@ export const signupController = async (req, res) => {
   }
 }
 
-export const loginController = async (req, res) => {
+export const adminLoginController = async (req, res) => {
   const { emailorusername, password } = req.body;
   
   try {
@@ -90,48 +91,12 @@ export const loginController = async (req, res) => {
   }
 }
 
-export const requestController = async (req, res) => {
-  const { title, count } = req.body;
-  
-  const userId = req.user._id;
-  
+export const getRequestList = async (req, res) => {
   try {
-    if (!title || count === undefined) {
-      return res.status(400).json({ success: false, message: "all fields required" });
-    }
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ success: false, message: "User not found" });
-    }
-    
-    const newRequest = new Document({
-      title,
-      count,
-      requestedBy: userId
-    });
-    
-    const savedRequest = await newRequest.save();
-    
-    // Push the document ID to the user's requestDocument array
-    user.requestDocument.push(savedRequest._id);
-    await user.save();
-    
-    // Populate requestDocument in the User model (only specific fields)
-    const populatedUser = await User.findById(userId)
-      .populate({
-        path: "requestDocument",  // Populate the requestDocument array
-        select: "title count status releaseData",  // Only select specific fields from the Document
-        populate: {
-          path: "requestedBy",   // Populate the requestedBy field within each document
-          select: "username"     // Only select the username from the User
-        }
-      });
-    
-    // Return the populated user data
-    return res.status(201).json(populatedUser);
+    const documentRequest = await Document.find({});
+    res.json(documentRequest)
   } catch (e) {
-    console.log("error in request controller", e);
-    res.status(500).json({ success: false, message: "internal server error" });
+    console.log("error in getRequestList controller")
+    res.status(500).json({success: false, message: "internal server error"})
   }
-};
+}

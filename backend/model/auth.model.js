@@ -21,10 +21,10 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user"
   },
-  requestDocument: {
-    type: [Schema.Types.ObjectId],
-    ref: Document
-  }
+  requestDocument: [{
+    type: Schema.Types.ObjectId,
+    ref: "Document"
+  }]
 })
 
 

@@ -1,9 +1,15 @@
 import mongoose from "mongoose";
+import { User } from "./auth.model.js"
 
 const documentSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true
+  },
+  count: {
+    type: Number,
+    required: true,
+    default: 1
   },
   status: {
     type: String,
@@ -14,13 +20,17 @@ const documentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now()
   },
-  releaseData: {
+  releaseDate: {
     type: Date,
     default: () => {
-      let date = Date.now();
+      let date = new Date();
       date.setDate(date.getDate() + 1);
       return date;
     }
+  },
+  requestedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 })
 
