@@ -113,25 +113,41 @@ export const requestController = async (req, res) => {
     
     const savedRequest = await newRequest.save();
     
-    // Push the document ID to the user's requestDocument array
     user.requestDocument.push(savedRequest._id);
     await user.save();
     
-    // Populate requestDocument in the User model (only specific fields)
     const populatedUser = await User.findById(userId)
       .populate({
-        path: "requestDocument",  // Populate the requestDocument array
-        select: "title count status releaseData",  // Only select specific fields from the Document
+        path: "requestDocument",
+        select: "title count status releaseData",
         populate: {
-          path: "requestedBy",   // Populate the requestedBy field within each document
-          select: "username"     // Only select the username from the User
+          path: "requestedBy",
+          select: "username"
         }
       });
-    
-    // Return the populated user data
+      
     return res.status(201).json(populatedUser);
   } catch (e) {
     console.log("error in request controller", e);
     res.status(500).json({ success: false, message: "internal server error" });
   }
 };
+
+export const logoutController = async (req, res) => {
+  try {
+    res.clearCookie("jwt-request");
+    res.status(200).json({success: true, message:"Logout Success"});
+  } catch (e) {
+    console.log("error in logout Controller", e.message)
+    res.status(500).json({success:false, message:"internal server error"});
+  }
+}
+
+export const authCheckController = async (req, res) => {
+  try {
+    res.status(200).json({success: true, user: req.user})
+  } catch (error) {
+    console.log("error in authCheck Controller", error.message)
+    res.status(500).json({success: false, message: "internal server error"})
+  }
+}

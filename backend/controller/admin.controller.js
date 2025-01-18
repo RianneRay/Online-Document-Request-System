@@ -100,3 +100,22 @@ export const getRequestList = async (req, res) => {
     res.status(500).json({success: false, message: "internal server error"})
   }
 }
+
+export const adminLogoutController = async (req, res) => {
+  try {
+    res.clearCookie("jwt-request");
+    res.status(200).json({success: true, message:"Logout Success"});
+  } catch (e) {
+    console.log("error in logout Controller", e.message)
+    res.status(500).json({success:false, message:"internal server error"});
+  }
+}
+
+export const authCheckController = async (req, res) => {
+  try {
+    res.status(200).json({success: true, user: req.user})
+  } catch (error) {
+    console.log("error in authCheck Controller", error.message)
+    res.status(500).json({success: false, message: "internal server error"})
+  }
+}
